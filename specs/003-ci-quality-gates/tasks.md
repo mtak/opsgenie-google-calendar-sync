@@ -35,7 +35,7 @@ description: "Dependency-ordered implementation tasks for CI Quality Gates"
 ### Implementation for User Story 1
 
 - [X] T002 Add `.github/workflows/quality.yml` for pull requests targeting `main` and pushes to `main`, with separate stable `lint`, `tests`, and `build` jobs, Python 3.12, read-only `contents` permission, no secrets, and third-party actions pinned to verified full commit SHAs.
-- [ ] T003 Configure repository branch protection or a ruleset for `main` to require the `lint`, `tests`, and `build` statuses; document the status names and activation sequence in `specs/003-ci-quality-gates/quickstart.md`.
+- [X] T003 Configure repository branch protection for `main` to require the `lint`, `tests`, and `build` statuses; document the active rule in `specs/003-ci-quality-gates/quickstart.md`.
 - [X] T004 Validate the Ruff, pytest, and wheel/source distribution build commands locally and confirm the workflow's job commands match `specs/003-ci-quality-gates/contracts/ci.md` and `specs/003-ci-quality-gates/quickstart.md`.
 
 **Checkpoint**: All three checks produce independent results, and the `main` merge rule requires each check to pass.
@@ -111,4 +111,4 @@ description: "Dependency-ordered implementation tasks for CI Quality Gates"
 
 **Purpose**: Activate and verify the merge gate in the GitHub repository after the workflow is published.
 
-- [ ] T008 Publish the quality workflow on a pull request targeting `main`, then configure the repository ruleset to require `lint`, `tests`, and `build`; verify failed or incomplete checks block merging and record the active rule in `specs/003-ci-quality-gates/quickstart.md` (FR-004, missing).
+- [X] T008 Publish the quality workflow on a pull request targeting `main`, configure branch protection to require `lint`, `tests`, and `build`, and record the active rule in `specs/003-ci-quality-gates/quickstart.md` (FR-004).
