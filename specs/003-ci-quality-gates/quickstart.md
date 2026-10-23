@@ -44,4 +44,6 @@ Verified in the task worktree with Python 3.14.4:
 - `opsgenie-google-calendar-sync --help` displayed the documented executable name.
 - Workflow YAML passed `yamllint` with the relaxed GitHub-compatible profile.
 
-The local environment did not provide Python 3.12, so the exact CI interpreter baseline is configured in the workflow but has not been run locally. The repository merge rule is not active yet: it must be configured after these workflow check contexts are available in GitHub.
+The local environment did not provide Python 3.12, so the exact CI interpreter baseline is configured in the workflow but has not been run locally. On PR #6, GitHub Actions reported all three required check contexts as passing.
+
+The repository merge rule is not active. This repository is currently private, and GitHub returned HTTP 403 when reading branch protection and ruleset settings, stating that this requires GitHub Pro or a public repository. GitHub documents rulesets as available for public repositories on GitHub Free and for private repositories on paid plans; see [available rules for rulesets](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/available-rules-for-rulesets). After the repository plan or visibility supports protection, configure `Quality / lint`, `Quality / tests`, and `Quality / build` as required checks and verify that a failed check blocks merging.
