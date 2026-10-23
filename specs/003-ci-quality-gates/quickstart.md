@@ -23,7 +23,7 @@ Expected results: Ruff and pytest exit successfully, and `python -m build` creat
 ## Validate Pull Request Behavior
 
 1. Open or update a pull request targeting `main`.
-2. Confirm that `Quality / lint`, `Quality / tests`, and `Quality / build` each appear and complete.
+2. Confirm that `lint`, `tests`, and `build` each appear and complete.
 3. Confirm the repository's branch protection or ruleset requires all three status checks before merge.
 4. Confirm a failed or incomplete required check blocks merging.
 5. Push a commit to `main` and confirm the same checks run.
@@ -46,4 +46,4 @@ Verified in the task worktree with Python 3.14.4:
 
 The local environment did not provide Python 3.12, so the exact CI interpreter baseline is configured in the workflow but has not been run locally. On PR #6, GitHub Actions reported all three required check contexts as passing.
 
-The repository merge rule is not active. This repository is currently private, and GitHub returned HTTP 403 when reading branch protection and ruleset settings, stating that this requires GitHub Pro or a public repository. GitHub documents rulesets as available for public repositories on GitHub Free and for private repositories on paid plans; see [available rules for rulesets](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/available-rules-for-rulesets). After the repository plan or visibility supports protection, configure `Quality / lint`, `Quality / tests`, and `Quality / build` as required checks and verify that a failed check blocks merging.
+The repository merge rule is not active. This repository is currently private, and GitHub returned HTTP 403 when reading branch protection and ruleset settings, stating that this requires GitHub Pro or a public repository. GitHub documents rulesets as available for public repositories on GitHub Free and for private repositories on paid plans; see [available rules for rulesets](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/available-rules-for-rulesets). After the repository plan or visibility supports protection, configure `lint`, `tests`, and `build` as required checks and verify that a failed check blocks merging.

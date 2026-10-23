@@ -66,7 +66,7 @@ src/opsgenie_google_calendar_sync/
 tests/
 ```
 
-**Structure Decision**: This is a repository-level quality automation change in the existing Python CLI project. Add one GitHub Actions workflow, extend existing project metadata, and fix the README command references. No application source layout changes are required. Configure `main` branch protection or a repository ruleset to require the three stable check contexts (`Quality / lint`, `Quality / tests`, and `Quality / build`) after the workflow has reported them once.
+**Structure Decision**: This is a repository-level quality automation change in the existing Python CLI project. Add one GitHub Actions workflow, extend existing project metadata, and fix the README command references. No application source layout changes are required. Configure `main` branch protection or a repository ruleset to require the three stable check contexts (`lint`, `tests`, and `build`) after the workflow has reported them once.
 
 ## Phase 0: Research Findings
 

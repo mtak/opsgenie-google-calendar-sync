@@ -10,9 +10,9 @@
 
 The `Quality` workflow exposes these stable check contexts, all of which must pass before a pull request can merge:
 
-- `Quality / lint`
-- `Quality / tests`
-- `Quality / build`
+- `lint`
+- `tests`
+- `build`
 
 A missing, cancelled, or failed required check does not satisfy the merge gate.
 
