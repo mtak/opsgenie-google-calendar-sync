@@ -1,7 +1,7 @@
 import pytest
 
-from oncall_calendar_sync.cli import sync_once
-from oncall_calendar_sync.config import Config
+from opsgenie_google_calendar_sync.cli import sync_once
+from opsgenie_google_calendar_sync.config import Config
 
 
 INVALID_EVENTS = [
@@ -27,8 +27,8 @@ INVALID_PAYLOADS = [b"", b"not ical", b"BEGIN:VCALENDAR\nVERSION:2.0\nEND:VCALEN
 @pytest.mark.parametrize("payload", INVALID_PAYLOADS)
 def test_invalid_source_causes_zero_destination_access(tmp_path, monkeypatch, payload):
     config = Config("https://private.invalid/feed", "private-calendar", tmp_path / "client", tmp_path / "token")
-    monkeypatch.setattr("oncall_calendar_sync.cli.fetch_feed", lambda url: payload)
-    monkeypatch.setattr("oncall_calendar_sync.cli.load_credentials", lambda *args: pytest.fail("credentials loaded before source validation"))
+    monkeypatch.setattr("opsgenie_google_calendar_sync.cli.fetch_feed", lambda url: payload)
+    monkeypatch.setattr("opsgenie_google_calendar_sync.cli.load_credentials", lambda *args: pytest.fail("credentials loaded before source validation"))
     outcome = sync_once(config)
     assert outcome.outcome == "failure"
     assert outcome.error_category.startswith("source_")

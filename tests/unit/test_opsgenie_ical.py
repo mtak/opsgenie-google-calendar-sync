@@ -2,7 +2,7 @@ from datetime import timezone
 
 import pytest
 
-from oncall_calendar_sync.opsgenie_ical import FeedError, parse_feed
+from opsgenie_google_calendar_sync.opsgenie_ical import FeedError, parse_feed
 
 
 def test_parses_event_fields_and_timezone():

@@ -1,8 +1,8 @@
 from datetime import datetime, timezone
 from unittest.mock import Mock
 
-from oncall_calendar_sync.google_calendar import GoogleCalendarGateway
-from oncall_calendar_sync.reconcile import reconcile
+from opsgenie_google_calendar_sync.google_calendar import GoogleCalendarGateway
+from opsgenie_google_calendar_sync.reconcile import reconcile
 
 
 class FakeGateway:

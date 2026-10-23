@@ -20,8 +20,8 @@ class Config:
 
 
 def default_config_dir() -> Path:
-    override = os.environ.get("ONCALL_SYNC_CONFIG_DIR")
-    return Path(override).expanduser() if override else Path.home() / ".config/oncall-calendar-sync"
+    override = os.environ.get("OPSGENIE_GOOGLE_CALENDAR_SYNC_CONFIG_DIR")
+    return Path(override).expanduser() if override else Path.home() / ".config/opsgenie-google-calendar-sync"
 
 
 def load_config(config_dir: Path | str | None = None) -> Config:

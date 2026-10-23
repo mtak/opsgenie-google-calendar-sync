@@ -61,7 +61,7 @@ def _report(result: SyncOutcome):
 
 
 def main(argv=None):
-    parser = argparse.ArgumentParser(prog="oncall-calendar-sync")
+    parser = argparse.ArgumentParser(prog="opsgenie-google-calendar-sync")
     parser.add_argument("command", choices=("authorize", "sync"))
     parser.add_argument("--config-dir", type=Path, default=None)
     args = parser.parse_args(argv)

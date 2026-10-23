@@ -2,7 +2,7 @@ import os
 
 import pytest
 
-from oncall_calendar_sync.config import ConfigError, load_config
+from opsgenie_google_calendar_sync.config import ConfigError, load_config
 
 
 def test_loads_required_settings_and_default_oauth_names(tmp_path):
@@ -42,5 +42,5 @@ def test_environment_overrides_config_dir(tmp_path, monkeypatch):
     (tmp_path / "config.toml").write_text(
         'source_ical_url="https://example.invalid/feed"\ntarget_calendar_id="cal"\n'
     )
-    monkeypatch.setenv("ONCALL_SYNC_CONFIG_DIR", str(tmp_path))
+    monkeypatch.setenv("OPSGENIE_GOOGLE_CALENDAR_SYNC_CONFIG_DIR", str(tmp_path))
     assert load_config().target_calendar_id == "cal"

@@ -12,10 +12,10 @@
 Create the private config directory and settings outside the repository:
 
 ```sh
-mkdir -p "$HOME/.config/oncall-calendar-sync"
-chmod 700 "$HOME/.config/oncall-calendar-sync"
-cp config.example.toml "$HOME/.config/oncall-calendar-sync/config.toml"
-chmod 600 "$HOME/.config/oncall-calendar-sync/config.toml"
+mkdir -p "$HOME/.config/opsgenie-google-calendar-sync"
+chmod 700 "$HOME/.config/opsgenie-google-calendar-sync"
+cp config.example.toml "$HOME/.config/opsgenie-google-calendar-sync/config.toml"
+chmod 600 "$HOME/.config/opsgenie-google-calendar-sync/config.toml"
 ```
 
 Edit `config.toml` locally to set the real Opsgenie URL and Google Calendar ID. Keep the OAuth Desktop client as `oauth-client.json` in this directory and restrict it to mode 0600. Never put these values in tracked files, issue reports, or logs. Relative OAuth paths resolve from the config directory.
@@ -31,7 +31,7 @@ Edit `config.toml` locally to set the real Opsgenie URL and Google Calendar ID. 
    python -m venv .venv
    . .venv/bin/activate
    pip install .
-   oncall-calendar-sync authorize --config-dir "$HOME/.config/oncall-calendar-sync"
+   opsgenie-google-calendar-sync authorize --config-dir "$HOME/.config/opsgenie-google-calendar-sync"
    ```
 
 The command saves `token.json` with mode 0600. If authorization happens on a different machine, transfer the token securely and keep the directory private. Do not send the token in chat or commit it.
@@ -43,7 +43,7 @@ The feed comparison is documented below. The sync deletes future events absent f
 Build and run against a dedicated test calendar first:
 
 ```sh
-export ONCALL_SYNC_CONFIG_DIR="$HOME/.config/oncall-calendar-sync"
+export OPSGENIE_GOOGLE_CALENDAR_SYNC_CONFIG_DIR="$HOME/.config/opsgenie-google-calendar-sync"
 docker compose build
 docker compose run --rm sync
 ```
@@ -51,7 +51,7 @@ docker compose run --rm sync
 Once the summary is successful and changes are verified in the dedicated test calendar, add a daily host cron entry:
 
 ```cron
-0 6 * * * cd /path/to/oncall-calendar-sync && ONCALL_SYNC_CONFIG_DIR="$HOME/.config/oncall-calendar-sync" docker compose run --rm sync
+0 6 * * * cd /path/to/opsgenie-google-calendar-sync && OPSGENIE_GOOGLE_CALENDAR_SYNC_CONFIG_DIR="$HOME/.config/opsgenie-google-calendar-sync" docker compose run --rm sync
 ```
 
 The sync container receives the private directory read-only. Check its exit status and sanitized summary for failures. A revoked or invalid refresh token requires running `authorize` again. Do not select the family calendar for destructive tests.

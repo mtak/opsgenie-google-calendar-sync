@@ -24,7 +24,7 @@ class Shift:
 
 def fetch_feed(url: str, timeout: float = 30) -> bytes:
     try:
-        request = Request(url, headers={"User-Agent": "oncall-calendar-sync/0.1"})
+        request = Request(url, headers={"User-Agent": "opsgenie-google-calendar-sync/0.1"})
         with urlopen(request, timeout=timeout) as response:
             if response.status != 200:
                 raise FeedError("source_fetch_failed")

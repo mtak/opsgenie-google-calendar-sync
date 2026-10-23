@@ -4,7 +4,7 @@
 
 ### `authorize`
 
-Starts the one-time Google desktop OAuth consent flow, opens a browser on the authorization machine, and stores the resulting refresh token in `~/.config/oncall-calendar-sync/token.json`.
+Starts the one-time Google desktop OAuth consent flow, opens a browser on the authorization machine, and stores the resulting refresh token in `~/.config/opsgenie-google-calendar-sync/token.json`.
 
 - Requires a configured OAuth desktop client file outside the repository.
 - Requires a browser-capable machine for the loopback authorization callback.
@@ -23,7 +23,7 @@ Fetches and validates the Opsgenie feed, then reconciles upcoming shifts with th
 
 ## Configuration
 
-The default private configuration is `~/.config/oncall-calendar-sync/config.toml`. It contains:
+The default private configuration is `~/.config/opsgenie-google-calendar-sync/config.toml`. It contains:
 
 - Opsgenie iCalendar feed URL
 - Google Calendar ID
