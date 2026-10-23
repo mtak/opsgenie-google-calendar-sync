@@ -28,15 +28,17 @@
 
 ## Opsgenie iCalendar feed
 
-**Decision**: Treat the configured feed as the source of upcoming schedule state, but permit destructive reconciliation only after the response is fully retrieved, parsed, non-empty, and every event has a usable identity. Preserve past destination events. Validate actual feed identity and edit/removal behavior before enabling automatic future deletion.
+**Decision**: Treat a fully retrieved and parsed, non-empty feed as the source snapshot. Delete only future Google events carrying this application's private ownership marker when they are absent from that snapshot. Empty, malformed, incomplete, or identity-invalid snapshots cause no calendar changes. Preserve past destination events and all unmarked events.
 
-**Rationale**: Atlassian documentation describes a rolling future window for the Opsgenie calendar export; the documented horizon differs by export path. The documentation does not specify whether event UIDs remain stable after edits or how schedule removals/cancellations appear. A rolling feed can make absence ambiguous, so the implementation must not use a failed or empty read as a deletion signal.
+**Rationale**: The user accepts source absence as a deletion signal for sync-managed future events. An application-owned private marker defines the only events eligible for mutation. A rolling feed can omit events outside its current window; the user's policy accepts deletion of managed future events absent from the current valid non-empty feed. Empty or invalid reads remain fail-closed.
 
 **Alternatives considered**:
-- Treat any event absent from any response as deleted: rejected because a network, parsing, empty-feed, or rolling-window issue could erase valid calendar items.
+- Treat any event absent from an empty, failed, or invalid response as deleted: rejected because such a response is not an accepted source snapshot.
 - Use a downloaded static export: rejected because the user needs periodic updates.
 
-**Open validation**: Compare sanitized samples before and after a shift time change and future shift removal. Verify UIDs, timezone representation, and the actual feed horizon without committing the real feed URL or feed contents.
+**Sanitized observation (2026-10-23)**: The user compared the feed around an upcoming schedule change and removal. Events have a UID field; the observed start and end times use Zulu (UTC) notation, and the event was within the feed window. The user reports that UIDs for all events change whenever the schedule changes. After removal, the event disappears without a cancellation or other removal marker.
+
+**Deletion decision**: The user accepts deletion of future sync-managed events absent from a valid non-empty feed. UID churn does not expand deletion scope because Google Calendar events are selected by the private application marker. Reconciliation first matches by UID, then by normalized event fields to retain unchanged shifts when UIDs rotate; unmatched future managed events are deleted. Empty feeds remain a no-op. The rolling-window boundary was not measured; the user accepts source absence, including absence due to the feed's current window, as deletion for managed future events.
 
 **Sources**:
 - Atlassian Support, [Manage on-call schedules and rotations](https://support.atlassian.com/opsgenie/docs/manage-on-call-schedules-and-rotations/)
