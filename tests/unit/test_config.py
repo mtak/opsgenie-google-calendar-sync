@@ -1,5 +1,3 @@
-import os
-
 import pytest
 
 from opsgenie_google_calendar_sync.config import ConfigError, load_config
