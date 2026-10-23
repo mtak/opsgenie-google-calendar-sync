@@ -59,7 +59,7 @@ def test_reconcile_deletes_only_absent_future_managed_events_and_empty_feed_is_n
         past_start = now - timedelta(days=3)
         gateway.create_event(managed_body("past", "Past managed history", past_start, past_start + timedelta(hours=8)))
         stale_start = now + timedelta(days=10)
-        stale = gateway.create_event(managed_body("removed", "Removed shift", stale_start, stale_start + timedelta(hours=8)))
+        gateway.create_event(managed_body("removed", "Removed shift", stale_start, stale_start + timedelta(hours=8)))
         current = gateway.create_event(managed_body("current", "Old shift title", start, end))
 
         desired = Shift("current", start, end, "Updated shift title")

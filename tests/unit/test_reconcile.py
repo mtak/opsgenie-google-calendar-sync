@@ -1,4 +1,3 @@
-from datetime import datetime, timezone
 from unittest.mock import Mock
 
 from opsgenie_google_calendar_sync.google_calendar import GoogleCalendarGateway

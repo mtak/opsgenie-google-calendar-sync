@@ -10,7 +10,7 @@
 Keep Opsgenie shifts on the family Google Calendar, without copying them by hand.
 
 ```console
-oncall-calendar-sync sync
+opsgenie-google-calendar-sync sync
 status=success added=1 updated=0 removed=0
 ```
 
@@ -81,7 +81,7 @@ The Google account you authorize must also have edit access to the target calend
 On a machine with a browser, run the one-time consent flow:
 
 ```bash
-oncall-calendar-sync authorize
+opsgenie-google-calendar-sync authorize
 status=success authorization_saved
 ```
 
@@ -90,7 +90,7 @@ The authorization command opens a browser and saves `token.json` with owner-only
 Run a sync:
 
 ```bash
-oncall-calendar-sync sync
+opsgenie-google-calendar-sync sync
 status=success added=2 updated=1 removed=1
 ```
 
@@ -105,7 +105,7 @@ Feed errors are detected before destination changes. Google read or write failur
 ## CLI reference
 
 ```text
-oncall-calendar-sync {authorize,sync} [--config-dir CONFIG_DIR]
+opsgenie-google-calendar-sync {authorize,sync} [--config-dir CONFIG_DIR]
 ```
 
 | Argument | Description |

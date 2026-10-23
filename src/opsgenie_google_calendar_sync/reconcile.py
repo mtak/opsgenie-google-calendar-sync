@@ -3,7 +3,7 @@
 from dataclasses import dataclass
 from datetime import datetime, timezone
 
-from .opsgenie_ical import FeedError, Shift
+from .opsgenie_ical import Shift
 
 SYNC_MARKER = "opsgenie-calendar-sync-v1"
 
