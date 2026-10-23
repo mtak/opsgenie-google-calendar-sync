@@ -62,9 +62,23 @@ The default config directory is `~/.config/oncall-calendar-sync`. To use another
 export ONCALL_SYNC_CONFIG_DIR="$HOME/.config/oncall-calendar-sync"
 ```
 
+## Google Cloud setup (one time)
+
+The sync needs a Google Cloud project so Google can identify the app and let you grant it Calendar access. For one calendar synced once a day, creating the project and using the Calendar API should cost nothing: Google currently lists standard Calendar API use as no additional cost. Google says requests above its daily standard quota may become billable later in 2026; this sync's ordinary daily use is far below that threshold. See [Calendar API quotas and pricing](https://developers.google.com/workspace/calendar/api/guides/quota).
+
+These are manual steps in Google Cloud, but you only need to do them once:
+
+1. [Create or select a Google Cloud project](https://console.cloud.google.com/projectcreate).
+2. [Enable the Google Calendar API](https://console.cloud.google.com/marketplace/product/google/calendar-json.googleapis.com) for that project.
+3. Configure the consent screen in [Google Auth Platform → Branding](https://console.cloud.google.com/auth/branding): set an app name, support email, and developer contact. In [Audience](https://console.cloud.google.com/auth/audience), choose **External** for a personal Google account. **Internal** is only for accounts in a Google Workspace organization. Add the Google account you will authorize as a test user, and in [Data Access](https://console.cloud.google.com/auth/scopes) add `https://www.googleapis.com/auth/calendar.events`.
+4. For unattended runs, change the app's publishing status from **Testing** to **In production** in Audience. Google-issued refresh tokens for external apps left in Testing expire after seven days. Personal apps used by fewer than 100 people do not have to complete OAuth verification, though Google may show an unverified-app warning during authorization. See Google's [personal-use verification exception](https://support.google.com/cloud/answer/13464323) and [refresh-token rules](https://developers.google.com/identity/protocols/oauth2#expiration).
+5. In [Google Auth Platform → Clients](https://console.cloud.google.com/auth/clients), create an OAuth client with application type **Desktop app**. Download its JSON file, save it as `oauth-client.json` in your private config directory, and restrict it to your user (`chmod 600`). Google's [Calendar API Python quickstart](https://developers.google.com/workspace/calendar/api/quickstart/python) has the corresponding console walkthrough.
+
+The Google account you authorize must also have edit access to the target calendar. After setup, the sync uses the saved refresh token; scheduled runs do not need the browser.
+
 ## Authorize and run
 
-Enable the Google Calendar API for a Google Cloud project and create a Desktop OAuth client. On a machine with a browser, run the one-time consent flow:
+On a machine with a browser, run the one-time consent flow:
 
 ```bash
 oncall-calendar-sync authorize
