@@ -4,7 +4,7 @@ from datetime import datetime, timedelta, timezone
 import pytest
 from googleapiclient.errors import HttpError
 
-from oncall_calendar_sync.google_calendar import CalendarAccessError, GoogleCalendarGateway, load_credentials
+from opsgenie_google_calendar_sync.google_calendar import CalendarAccessError, GoogleCalendarGateway, load_credentials
 
 
 def test_refresh_token_credentials_loaded_from_private_file(tmp_path):
@@ -19,7 +19,7 @@ def test_expired_credentials_refresh_in_memory_without_persisting_access_token(t
     token = tmp_path / "token.json"
     token.write_text("original")
     credentials = Mock(expired=True, refresh_token="refresh", valid=True)
-    monkeypatch.setattr("oncall_calendar_sync.google_calendar.Credentials.from_authorized_user_file", lambda *args: credentials)
+    monkeypatch.setattr("opsgenie_google_calendar_sync.google_calendar.Credentials.from_authorized_user_file", lambda *args: credentials)
     assert load_credentials(token, ["scope"]) is credentials
     credentials.refresh.assert_called_once()
     assert token.read_text() == "original"

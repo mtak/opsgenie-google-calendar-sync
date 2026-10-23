@@ -23,9 +23,9 @@ description: "Dependency-ordered implementation tasks for Opsgenie Calendar Sync
 **Purpose**: Initialize the Python package, public-safe local configuration example, and container entry point.
 
 - [X] T001 [P] Create `pyproject.toml` with Python 3.12 package metadata, the planned Google OAuth/Calendar and iCalendar runtime dependencies, and pytest development dependency.
-- [X] T002 [P] Create the installable package entry file `src/oncall_calendar_sync/__init__.py` and shared pytest fixtures file `tests/conftest.py`.
+- [X] T002 [P] Create the installable package entry file `src/opsgenie_google_calendar_sync/__init__.py` and shared pytest fixtures file `tests/conftest.py`.
 - [X] T003 [P] Add nonfunctional placeholder settings to `config.example.toml` and ignore local settings, OAuth client files, and token files in `.gitignore`.
-- [X] T004 Create `Dockerfile` and `docker-compose.yml` for a one-shot sync container that receives `ONCALL_SYNC_CONFIG_DIR` and mounts that private directory read-only.
+- [X] T004 Create `Dockerfile` and `docker-compose.yml` for a one-shot sync container that receives `OPSGENIE_GOOGLE_CALENDAR_SYNC_CONFIG_DIR` and mounts that private directory read-only.
 
 ---
 
@@ -34,9 +34,9 @@ description: "Dependency-ordered implementation tasks for Opsgenie Calendar Sync
 **Purpose**: Validate local configuration and provide a tested Google Calendar gateway before user-story synchronization work begins.
 
 - [X] T005 [P] Add configuration tests in `tests/unit/test_config.py` for required TOML keys, defaults, missing files, invalid values, and sanitized errors.
-- [X] T006 Implement TOML loading, default path resolution, `ONCALL_SYNC_CONFIG_DIR` override, and validation in `src/oncall_calendar_sync/config.py`.
+- [X] T006 Implement TOML loading, default path resolution, `OPSGENIE_GOOGLE_CALENDAR_SYNC_CONFIG_DIR` override, and validation in `src/opsgenie_google_calendar_sync/config.py`.
 - [X] T007 [P] Add mocked Google Calendar gateway tests in `tests/unit/test_google_calendar.py` for authorization loading, pagination, create/update/delete calls, and permission-denied responses.
-- [X] T008 Implement the OAuth credential loader and Google Calendar event gateway in `src/oncall_calendar_sync/google_calendar.py`, including refresh-token use, pagination, and clear propagation of permission failures.
+- [X] T008 Implement the OAuth credential loader and Google Calendar event gateway in `src/opsgenie_google_calendar_sync/google_calendar.py`, including refresh-token use, pagination, and clear propagation of permission failures.
 
 **Checkpoint**: Shared configuration and Google access are testable. No source-driven calendar mutations should be enabled before the story-specific feed validation and ownership safeguards are complete.
 
@@ -55,9 +55,9 @@ description: "Dependency-ordered implementation tasks for Opsgenie Calendar Sync
 
 ### Implementation for User Story 1
 
-- [X] T011 [US1] Implement iCalendar feed retrieval and source event normalization in `src/oncall_calendar_sync/opsgenie_ical.py`, preserving source times, time zones, and available details.
-- [X] T012 [US1] Implement add/update reconciliation by source UID in `src/oncall_calendar_sync/reconcile.py`, mapping source event details to Google Calendar event fields.
-- [X] T013 [US1] Add the repeatable `sync` command in `src/oncall_calendar_sync/cli.py` and report successful run status with added, updated, and removed counts.
+- [X] T011 [US1] Implement iCalendar feed retrieval and source event normalization in `src/opsgenie_google_calendar_sync/opsgenie_ical.py`, preserving source times, time zones, and available details.
+- [X] T012 [US1] Implement add/update reconciliation by source UID in `src/opsgenie_google_calendar_sync/reconcile.py`, mapping source event details to Google Calendar event fields.
+- [X] T013 [US1] Add the repeatable `sync` command in `src/opsgenie_google_calendar_sync/cli.py` and report successful run status with added, updated, and removed counts.
 
 **Checkpoint**: User Story 1 works against a dedicated test calendar. Do not use the family calendar until User Story 3's failure and ownership safeguards are complete.
 
@@ -76,7 +76,7 @@ description: "Dependency-ordered implementation tasks for Opsgenie Calendar Sync
 
 ### Implementation for User Story 2
 
-- [X] T016 [US2] Implement the `authorize` command in `src/oncall_calendar_sync/cli.py` using the desktop OAuth flow and save the refresh token only to the configured private token file.
+- [X] T016 [US2] Implement the `authorize` command in `src/opsgenie_google_calendar_sync/cli.py` using the desktop OAuth flow and save the refresh token only to the configured private token file.
 - [X] T017 [US2] Document Google Cloud project/API setup, consent-screen Production setting, browser authorization, secure token transfer, and host cron invocation in `specs/001-opsgenie-calendar-sync/quickstart.md`.
 
 **Checkpoint**: User Story 2 can authorize once and run the sync as a one-shot Docker Compose job from host cron.
@@ -98,10 +98,10 @@ description: "Dependency-ordered implementation tasks for Opsgenie Calendar Sync
 
 ### Implementation for User Story 3
 
-- [X] T022 [US3] Reject empty, incomplete, malformed, unsupported, missing-UID, or duplicate-UID source snapshots before reconciliation in `src/oncall_calendar_sync/opsgenie_ical.py` and `src/oncall_calendar_sync/reconcile.py`.
+- [X] T022 [US3] Reject empty, incomplete, malformed, unsupported, missing-UID, or duplicate-UID source snapshots before reconciliation in `src/opsgenie_google_calendar_sync/opsgenie_ical.py` and `src/opsgenie_google_calendar_sync/reconcile.py`.
 - [X] T023 [US3] Privately compare sanitized Opsgenie feed observations before and after an upcoming shift edit/removal; record only UID stability, removal representation, and feed-window behavior in `specs/001-opsgenie-calendar-sync/research.md`, never storing the real URL or event data. The user accepts absence as deletion for marked future events in a valid non-empty feed; empty feeds remain a no-op.
-- [X] T024 [US3] Mark created Google events with a private application marker and source UID; list and modify only marked events, delete unmatched future marked events only after a valid non-empty feed, and retain past events in `src/oncall_calendar_sync/google_calendar.py` and `src/oncall_calendar_sync/reconcile.py`.
-- [X] T025 [P] [US3] Sanitize run output, return nonzero status for failed or partial writes, and create private OAuth/config files with restrictive permissions in `src/oncall_calendar_sync/cli.py` and `src/oncall_calendar_sync/config.py`.
+- [X] T024 [US3] Mark created Google events with a private application marker and source UID; list and modify only marked events, delete unmatched future marked events only after a valid non-empty feed, and retain past events in `src/opsgenie_google_calendar_sync/google_calendar.py` and `src/opsgenie_google_calendar_sync/reconcile.py`.
+- [X] T025 [P] [US3] Sanitize run output, return nonzero status for failed or partial writes, and create private OAuth/config files with restrictive permissions in `src/opsgenie_google_calendar_sync/cli.py` and `src/opsgenie_google_calendar_sync/config.py`.
 - [X] T026 [US3] Document the verified feed behavior, fail-closed behavior, and dedicated-test-calendar checks in `specs/001-opsgenie-calendar-sync/quickstart.md`.
 
 **Checkpoint**: All three user stories meet their safety and acceptance criteria; the family calendar can be selected only after source behavior and the opt-in integration tests have been validated.

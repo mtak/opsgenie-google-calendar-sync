@@ -6,17 +6,17 @@ from datetime import datetime, timedelta, timezone
 
 import pytest
 
-from oncall_calendar_sync.config import load_config
-from oncall_calendar_sync.google_calendar import GoogleCalendarGateway, build_calendar_service, load_credentials
-from oncall_calendar_sync.opsgenie_ical import Shift
-from oncall_calendar_sync.reconcile import reconcile
+from opsgenie_google_calendar_sync.config import load_config
+from opsgenie_google_calendar_sync.google_calendar import GoogleCalendarGateway, build_calendar_service, load_credentials
+from opsgenie_google_calendar_sync.opsgenie_ical import Shift
+from opsgenie_google_calendar_sync.reconcile import reconcile
 
 
-@pytest.mark.skipif(os.getenv("ONCALL_SYNC_INTEGRATION") != "1", reason="opt-in dedicated Calendar API test")
+@pytest.mark.skipif(os.getenv("OPSGENIE_GOOGLE_CALENDAR_SYNC_INTEGRATION") != "1", reason="opt-in dedicated Calendar API test")
 def test_authorized_create_update_delete_on_dedicated_calendar():
     config = load_config()
-    if not os.getenv("ONCALL_SYNC_TEST_CALENDAR_ID") or config.target_calendar_id != os.getenv("ONCALL_SYNC_TEST_CALENDAR_ID"):
-        pytest.fail("target must match ONCALL_SYNC_TEST_CALENDAR_ID")
+    if not os.getenv("OPSGENIE_GOOGLE_CALENDAR_SYNC_TEST_CALENDAR_ID") or config.target_calendar_id != os.getenv("OPSGENIE_GOOGLE_CALENDAR_SYNC_TEST_CALENDAR_ID"):
+        pytest.fail("target must match OPSGENIE_GOOGLE_CALENDAR_SYNC_TEST_CALENDAR_ID")
     gateway = GoogleCalendarGateway(build_calendar_service(load_credentials(config.oauth_token_file, ["https://www.googleapis.com/auth/calendar.events"])), config.target_calendar_id)
     marker = f"integration-{uuid.uuid4()}"
     body = {"summary": "Temporary sync integration event", "start": {"dateTime": "2030-01-01T09:00:00Z"}, "end": {"dateTime": "2030-01-01T10:00:00Z"}, "extendedProperties": {"private": {"oncallCalendarSync": marker, "sourceUid": marker}}}
@@ -28,12 +28,12 @@ def test_authorized_create_update_delete_on_dedicated_calendar():
         gateway.delete_event(created["id"])
 
 
-@pytest.mark.skipif(os.getenv("ONCALL_SYNC_INTEGRATION") != "1", reason="opt-in dedicated Calendar API test")
+@pytest.mark.skipif(os.getenv("OPSGENIE_GOOGLE_CALENDAR_SYNC_INTEGRATION") != "1", reason="opt-in dedicated Calendar API test")
 def test_reconcile_deletes_only_absent_future_managed_events_and_empty_feed_is_noop():
     config = load_config()
-    test_calendar_id = os.getenv("ONCALL_SYNC_TEST_CALENDAR_ID")
+    test_calendar_id = os.getenv("OPSGENIE_GOOGLE_CALENDAR_SYNC_TEST_CALENDAR_ID")
     if not test_calendar_id or config.target_calendar_id != test_calendar_id:
-        pytest.fail("target must match ONCALL_SYNC_TEST_CALENDAR_ID")
+        pytest.fail("target must match OPSGENIE_GOOGLE_CALENDAR_SYNC_TEST_CALENDAR_ID")
     gateway = GoogleCalendarGateway(build_calendar_service(load_credentials(config.oauth_token_file, ["https://www.googleapis.com/auth/calendar.events"])), config.target_calendar_id)
     marker = f"integration-{uuid.uuid4()}"
     now = datetime.now(timezone.utc)

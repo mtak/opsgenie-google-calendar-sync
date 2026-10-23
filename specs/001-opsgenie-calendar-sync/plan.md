@@ -56,7 +56,7 @@ specs/001-opsgenie-calendar-sync/
 ### Source Code (repository root)
 
 ```text
-src/oncall_calendar_sync/
+src/opsgenie_google_calendar_sync/
 ├── __init__.py
 ├── cli.py                   # authorize and sync commands
 ├── config.py                # private runtime configuration validation
@@ -79,7 +79,7 @@ config.example.toml
 .gitignore                  # excludes private local configuration and token files
 ```
 
-**Structure Decision**: Use one small Python package and a CLI. Keep source-feed parsing, Google Calendar access, and reconciliation separate so the highest-risk rules can be tested without live credentials. Do not add a database, web server, or self-scheduling process. Keep operator config outside the repository at `~/.config/oncall-calendar-sync/`. Use a TOML settings file plus the OAuth client and token JSON files in that directory; mount the directory read-only into the sync container. Use Docker Compose for repeatable execution and host cron for the daily trigger.
+**Structure Decision**: Use one small Python package and a CLI. Keep source-feed parsing, Google Calendar access, and reconciliation separate so the highest-risk rules can be tested without live credentials. Do not add a database, web server, or self-scheduling process. Keep operator config outside the repository at `~/.config/opsgenie-google-calendar-sync/`. Use a TOML settings file plus the OAuth client and token JSON files in that directory; mount the directory read-only into the sync container. Use Docker Compose for repeatable execution and host cron for the daily trigger.
 
 ## Phase 0: Research Findings
 
@@ -93,11 +93,11 @@ See [data-model.md](data-model.md). The design has four records: source shift, s
 
 ### CLI Contract
 
-See [contracts/cli.md](contracts/cli.md). The user-facing contract is limited to one-time `authorize` and repeatable `sync` commands. Both read `~/.config/oncall-calendar-sync/config.toml` by default; an alternate config directory may be selected for Docker and headless-host setup. Scheduled runs report only result and change counts; they do not print event details or private configuration.
+See [contracts/cli.md](contracts/cli.md). The user-facing contract is limited to one-time `authorize` and repeatable `sync` commands. Both read `~/.config/opsgenie-google-calendar-sync/config.toml` by default; an alternate config directory may be selected for Docker and headless-host setup. Scheduled runs report only result and change counts; they do not print event details or private configuration.
 
 ### Operational Setup
 
-See [quickstart.md](quickstart.md). The setup requires creating a Google Cloud project, enabling Calendar API, configuring the OAuth consent screen, creating a Desktop app OAuth client, authorizing once in a browser, and storing the resulting token outside the repository. Runtime files live in `~/.config/oncall-calendar-sync/`: `config.toml`, `oauth-client.json`, and `token.json`. For a personal app with fewer than 100 users, Google says verification is not required, but the app remains unverified and shows a warning. The consent screen must not remain in Testing, because test authorizations expire after seven days.
+See [quickstart.md](quickstart.md). The setup requires creating a Google Cloud project, enabling Calendar API, configuring the OAuth consent screen, creating a Desktop app OAuth client, authorizing once in a browser, and storing the resulting token outside the repository. Runtime files live in `~/.config/opsgenie-google-calendar-sync/`: `config.toml`, `oauth-client.json`, and `token.json`. For a personal app with fewer than 100 users, Google says verification is not required, but the app remains unverified and shows a warning. The consent screen must not remain in Testing, because test authorizations expire after seven days.
 
 The Google OAuth scope depends on calendar ownership. Use the narrowest supported events scope that lets the authorized account edit the selected calendar: `calendar.events.owned` if that account owns it; otherwise evaluate `calendar.events`, which covers event access across calendars that account can access. Verify the calendar owner and editor access before choosing the scope. This permission breadth is the main security tradeoff to review before implementation.
 

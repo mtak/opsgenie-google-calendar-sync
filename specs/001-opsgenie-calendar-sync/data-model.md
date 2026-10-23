@@ -30,7 +30,7 @@ The sync marker and source UID are stored as Google Calendar private extended pr
 
 ## Private Runtime Configuration and Authorization
 
-Contains the source feed URL, target calendar identifier, OAuth desktop client data, and refresh token. The default directory is `~/.config/oncall-calendar-sync/`, containing `config.toml`, `oauth-client.json`, and `token.json`. These values are provided by the operator on the deployment machine and are not committed to source control. The OAuth refresh token is treated as a credential; set the directory to mode 0700 and files to mode 0600. The scheduled container receives a read-only bind mount.
+Contains the source feed URL, target calendar identifier, OAuth desktop client data, and refresh token. The default directory is `~/.config/opsgenie-google-calendar-sync/`, containing `config.toml`, `oauth-client.json`, and `token.json`. These values are provided by the operator on the deployment machine and are not committed to source control. The OAuth refresh token is treated as a credential; set the directory to mode 0700 and files to mode 0600. The scheduled container receives a read-only bind mount.
 
 ## Sync Run Result
 

@@ -7,7 +7,7 @@ Sync Impact Report
 - Follow-up TODOs: confirm original ratification date
 -->
 
-# Oncall Calendar Sync Constitution
+# Opsgenie Google Calendar Sync Constitution
 
 ## Core Principles
 

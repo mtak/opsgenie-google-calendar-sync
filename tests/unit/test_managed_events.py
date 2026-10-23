@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
 
-from oncall_calendar_sync.opsgenie_ical import Shift
-from oncall_calendar_sync.reconcile import reconcile
+from opsgenie_google_calendar_sync.opsgenie_ical import Shift
+from opsgenie_google_calendar_sync.reconcile import reconcile
 
 
 def test_updates_only_marker_owned_events_and_never_deletes_unrelated():

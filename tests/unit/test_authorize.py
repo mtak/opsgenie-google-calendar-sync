@@ -2,8 +2,8 @@ import json
 
 import pytest
 
-from oncall_calendar_sync.cli import authorize
-from oncall_calendar_sync.config import Config
+from opsgenie_google_calendar_sync.cli import authorize
+from opsgenie_google_calendar_sync.config import Config
 
 
 def test_authorize_persists_refresh_token_with_restrictive_mode(tmp_path):
