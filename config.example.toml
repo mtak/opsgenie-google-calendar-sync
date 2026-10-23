@@ -1,0 +1,5 @@
+# Copy to ~/.config/oncall-calendar-sync/config.toml and replace locally.
+source_ical_url = "https://example.invalid/replace-me.ics"
+target_calendar_id = "replace-with-calendar-id"
+oauth_client_file = "oauth-client.json"
+oauth_token_file = "token.json"

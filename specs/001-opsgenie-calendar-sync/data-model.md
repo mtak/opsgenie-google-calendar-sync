@@ -6,7 +6,7 @@ Represents one event read from the configured Opsgenie iCalendar feed.
 
 | Field | Meaning | Validation |
 | --- | --- | --- |
-| source_uid | Source event identity from the iCalendar `UID` | Required and unique within the feed; otherwise fail before writes |
+| source_uid | Current identity from the iCalendar `UID` | Required and unique within each feed snapshot; it may change across schedule edits |
 | start | Inclusive event start | Required; preserve source time and timezone semantics |
 | end | Exclusive event end | Required and later than start |
 | summary | Event title, if present | Optional source text; do not include in routine logs |
@@ -22,11 +22,11 @@ Represents a destination event created by this application.
 | --- | --- | --- |
 | google_event_id | Google Calendar event identifier | Assigned by Calendar API |
 | sync_marker | Private property identifying this application's events | Required on every created event |
-| source_uid | UID of the source shift | Required; used to match updates and removals |
+| source_uid | Current UID of the source shift | Stored for matching and diagnostics; normalized event fields provide a fallback when the UID rotates |
 | start/end/summary/description/location | Fields copied from the normalized source shift | Updated from Opsgenie on successful runs |
 | destination_status | Current Google event state | Deleted only when it is future-dated, marked as managed, and safely absent from a complete source snapshot |
 
-The sync marker and source UID are stored as Google Calendar private extended properties. Do not store OAuth tokens or the source feed URL in event metadata.
+The sync marker and source UID are stored as Google Calendar private extended properties. The marker defines ownership and is required before any update or deletion. Do not store OAuth tokens or the source feed URL in event metadata.
 
 ## Private Runtime Configuration and Authorization
 
@@ -47,5 +47,6 @@ Run output must not include private input values or event details. A partial Cal
 ## Relationships
 
 - One sync run reads one source feed and targets one calendar.
-- A source shift maps to at most one sync-managed Google event by source UID.
+- A source shift maps to at most one sync-managed Google event by current source UID, with normalized event fields used to preserve matches when UIDs rotate.
+- Only a valid non-empty source snapshot can authorize deletion; only unmatched future events with the private sync marker are deleted.
 - A Google Calendar can contain both sync-managed and unrelated family events; the application may modify only events carrying its own sync marker.

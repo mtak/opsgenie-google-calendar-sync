@@ -1,56 +1,67 @@
 # Quickstart: Opsgenie Calendar Sync
 
-This guide describes the intended first-run and daily-operation flow and the proposed private configuration layout. Exact commands will be finalized during implementation.
-
 ## Prerequisites
 
-- An Opsgenie iCalendar URL for the intended on-call schedule.
-- A Google account with permission to edit the family calendar.
-- A Google Cloud project, either existing or created for this personal app.
-- Docker Compose and cron on the always-on Linux machine.
-- A browser-capable machine for the one-time desktop OAuth authorization.
+- Python 3.12 or later for the one-time authorization setup.
+- Docker Compose and cron on the always-on Linux host.
+- An Opsgenie iCalendar URL and a Google account with edit permission on the chosen calendar.
+- A Google Cloud project with Calendar API enabled and a Desktop app OAuth client.
 
-## Google authorization setup
+## Private configuration
 
-1. In Google Cloud Console, select or create a project and enable the Google Calendar API.
-2. Configure the OAuth consent screen for the account that will authorize the sync. For personal use under 100 users, verification is not required, but Google may show an unverified-app warning.
-3. Set the app's publishing status to Production instead of leaving it in Testing; testing authorizations expire after seven days.
-4. Create an OAuth client of type Desktop app and download its client configuration to a private location outside the repository.
-5. Check who owns the family calendar. Authorize an account with edit access and select the narrowest supported event scope for that ownership/access model.
-6. Run the `authorize` command on a machine with a browser. It will open Google's consent page and save a refresh token to a private file.
-7. If authorization occurs on a different machine from the always-on host, transfer the token file securely and restrict its file permissions. Do not send it in chat or commit it.
+Create the private config directory and settings outside the repository:
 
-## Private sync configuration
-
-Create `~/.config/oncall-calendar-sync/` on the machine that will run cron. Store three files there:
-
-- `config.toml`: Opsgenie feed URL, Google Calendar ID, and paths to the OAuth files.
-- `oauth-client.json`: the downloaded Desktop app OAuth client configuration.
-- `token.json`: the refresh token produced by the one-time authorization.
-
-The public `config.example.toml` will contain only nonfunctional placeholders, in this shape:
-
-```toml
-source_ical_url = "https://example.invalid/replace-me.ics"
-target_calendar_id = "replace-with-calendar-id"
-oauth_client_file = "oauth-client.json"
-oauth_token_file = "token.json"
+```sh
+mkdir -p "$HOME/.config/oncall-calendar-sync"
+chmod 700 "$HOME/.config/oncall-calendar-sync"
+cp config.example.toml "$HOME/.config/oncall-calendar-sync/config.toml"
+chmod 600 "$HOME/.config/oncall-calendar-sync/config.toml"
 ```
 
-Resolve relative OAuth file paths from the directory containing `config.toml`. Set the directory permissions to 0700 and each file to 0600. If authorization was performed on another machine, copy the private directory to the always-on host over a secure channel. Set `ONCALL_SYNC_CONFIG_DIR` in the host environment or cron to point to this directory. Docker Compose mounts it read-only into the scheduled container. No real config, feed URL, calendar ID, OAuth file, or token belongs in the repository.
+Edit `config.toml` locally to set the real Opsgenie URL and Google Calendar ID. Keep the OAuth Desktop client as `oauth-client.json` in this directory and restrict it to mode 0600. Never put these values in tracked files, issue reports, or logs. Relative OAuth paths resolve from the config directory.
 
-## First sync and daily schedule
+## One-time Google authorization
 
-1. Validate that the configured feed can be fetched and parsed and includes stable UIDs. Use sanitized local samples for development; never commit the actual feed URL or captured private calendar contents.
-2. Run the sync manually once and confirm its status/count summary and the resulting events in a dedicated test calendar before selecting the family calendar for real use.
-3. Add a host cron entry that runs the Compose job once daily, for example at 06:00 local host time:
+1. Enable the Google Calendar API in Google Cloud Console.
+2. Configure the OAuth consent screen for personal use and publish it to Production; Google test-user refresh tokens expire after seven days.
+3. Check calendar ownership and choose the narrowest compatible Calendar events scope. This implementation currently requests `calendar.events` because a shared calendar may be owned by another account.
+4. Install the package on a browser-capable machine and run the interactive authorization command:
 
-   ```cron
-   0 6 * * * cd /path/to/oncall-calendar-sync && ONCALL_SYNC_CONFIG_DIR="$HOME/.config/oncall-calendar-sync" docker compose run --rm sync
+   ```sh
+   python -m venv .venv
+   . .venv/bin/activate
+   pip install .
+   oncall-calendar-sync authorize --config-dir "$HOME/.config/oncall-calendar-sync"
    ```
 
-4. Check cron's exit status or sanitized logs for failures. If authorization has been revoked or invalidated, repeat the browser authorization step.
+The command saves `token.json` with mode 0600. If authorization happens on a different machine, transfer the token securely and keep the directory private. Do not send the token in chat or commit it.
 
-## Safety checks before enabling deletions
+## First run and schedule
 
-Opsgenie documentation does not guarantee stable iCalendar UIDs or document how removed shifts appear in the feed. Before relying on feed absence for deletion, compare sanitized feed samples from before and after a shift change and removal. The sync must retain past entries, and an empty or invalid feed must never be treated as a complete deletion snapshot.
+The feed comparison is documented below. The sync deletes future events absent from a valid, non-empty feed only when they carry its private ownership marker. Empty, failed, or invalid feeds cause no destination changes. Past events and unmarked events remain untouched.
+
+Build and run against a dedicated test calendar first:
+
+```sh
+export ONCALL_SYNC_CONFIG_DIR="$HOME/.config/oncall-calendar-sync"
+docker compose build
+docker compose run --rm sync
+```
+
+Once the summary is successful and changes are verified in the dedicated test calendar, add a daily host cron entry:
+
+```cron
+0 6 * * * cd /path/to/oncall-calendar-sync && ONCALL_SYNC_CONFIG_DIR="$HOME/.config/oncall-calendar-sync" docker compose run --rm sync
+```
+
+The sync container receives the private directory read-only. Check its exit status and sanitized summary for failures. A revoked or invalid refresh token requires running `authorize` again. Do not select the family calendar for destructive tests.
+
+## Feed behavior validation status
+
+The sanitized feed comparison found that schedule changes appear to change UIDs across events, and a removed event disappears without a cancellation marker. The observed event used Zulu (UTC) times and was inside the feed window. The sync accommodates UID rotation by matching unchanged normalized event details. Per the user's policy, absence from a valid non-empty feed removes unmatched future events carrying the private ownership marker. Empty feeds remain a no-op; malformed or failed reads also cause no changes. Past and unmarked events are preserved.
+
+## Local performance check
+
+On 2026-10-23, reconciliation of 300 synthetic shifts through an in-memory fake Calendar gateway took 0.0023 seconds on the first run (300 additions) and 0.0025 seconds on a repeated run (0 updates, 0 removals). This checks local reconciliation cost only; it does not measure Google API latency.
+
+On 2026-10-23, the full unit suite passed (59 passed; 2 opt-in tests skipped when integration mode was off), `docker compose config` passed with a placeholder config-directory path, and both opt-in Google Calendar integration tests passed against the dedicated test calendar in 5.03 seconds. The integration tests create temporary marked and unmarked events and clean them up afterward. Do not use the family calendar for this check.

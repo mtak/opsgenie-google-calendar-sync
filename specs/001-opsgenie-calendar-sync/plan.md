@@ -83,7 +83,7 @@ config.example.toml
 
 ## Phase 0: Research Findings
 
-See [research.md](research.md). Decisions include a desktop OAuth flow for one personal user, Google event private extended properties for source identity, one-shot Compose execution from cron, and fail-closed reconciliation. A sanitized feed check remains a prerequisite for safely enabling source-driven deletion because Opsgenie does not document UID stability or cancellation encoding.
+See [research.md](research.md). Decisions include a desktop OAuth flow for one personal user, Google event private extended properties for ownership and source identity, one-shot Compose execution from cron, and fail-closed reconciliation. The user accepts deletion of future app-managed events absent from a valid non-empty feed; empty, failed, and invalid feeds cause no changes.
 
 ## Phase 1: Design
 
@@ -107,7 +107,7 @@ The Google OAuth scope depends on calendar ownership. Use the narrowest supporte
 2. Fetch the complete iCalendar response. Reject network errors, malformed calendars, empty feeds, duplicate or missing UIDs, and unsupported event shapes before any Google writes.
 3. Convert upcoming source events to a normalized desired event set, preserving source start/end times and timezone semantics.
 4. List only Google events marked with this application's private sync property; handle pagination and limit reconciliation to the active upcoming source window.
-5. Match events by source UID. Insert missing events, update changed fields, and remove future managed events absent from a successfully validated source feed. Preserve past managed events and all unmarked events.
+5. Match events by source UID, then by normalized event fields to accommodate UID rotation. Insert missing events, update changed fields and UIDs, and remove future managed events absent from a successfully validated non-empty source feed. Preserve past managed events and all unmarked events.
 6. Record per-operation failures truthfully. A failed or partial destination write returns a nonzero status; a subsequent run reconciles from current source state and existing managed events.
 7. Emit a sanitized summary with status and added/updated/removed counts. Never log event titles, source URLs, calendar IDs, OAuth tokens, or response bodies containing private values.
 
@@ -117,7 +117,7 @@ The Google OAuth scope depends on calendar ownership. Use the narrowest supporte
 - Reconciliation tests use a fake Calendar gateway to verify idempotence, sync ownership, past-event retention, deletion boundaries, and no writes after an invalid source read.
 - OAuth and Calendar client tests mock token refresh, revoked authorization, permission failures, API pagination, and partial write errors.
 - Manual integration uses a dedicated test calendar, never the family calendar for destructive scenarios. Confirm one-time authorization, repeated sync, source edit, future removal, past retention, and unrelated-event preservation.
-- Opsgenie feed behavior must be checked before implementing source-absence deletion. Compare observations around a shift edit/removal and record only UID stability, removal representation, and feed-window behavior in `research.md`; do not save the real feed URL or event data in Git. If a complete deletion signal cannot be established, leave source-absence deletion disabled.
+- Record sanitized Opsgenie feed behavior in `research.md`; do not save the real feed URL or event data in Git. Source UIDs may rotate on edits, so reconciliation must not rely on UID alone. Only a valid non-empty feed can authorize deletion, and only marked future events absent from it are eligible.
 - Run opt-in Calendar API integration tests only against a dedicated test calendar.
 - Measure a representative few-hundred-event sync against the one-minute performance goal and record the result in `quickstart.md`.
 

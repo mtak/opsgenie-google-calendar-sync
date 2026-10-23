@@ -28,7 +28,7 @@ The user wants upcoming on-call shifts from Opsgenie to appear in the family's s
 
 1. **Given** an upcoming shift exists in Opsgenie but not in the family calendar, **When** a sync completes, **Then** the shift appears in the family calendar.
 2. **Given** a source shift's time or details change, **When** a sync completes, **Then** the matching calendar entry reflects the source change without creating a duplicate.
-3. **Given** a future shift is removed from a successfully retrieved and parsed Opsgenie feed, **When** a sync completes, **Then** the corresponding sync-managed entry is removed from the family calendar.
+3. **Given** a future shift is absent from a successfully retrieved, completely parsed, non-empty Opsgenie feed, **When** a sync completes, **Then** the corresponding sync-managed entry is removed from the family calendar.
 4. **Given** a sync-managed shift has ended, **When** it is no longer present in the feed, **Then** its calendar entry remains as history.
 
 ### User Story 2 - Run unattended with one-time authorization (Priority: P1)
@@ -63,12 +63,13 @@ The user wants the sync to manage only the on-call entries it created and keep p
 
 ### Edge Cases
 
-- The source feed is temporarily unavailable, empty, or malformed; the sync must not interpret it as mass deletion.
+- The source feed is temporarily unavailable, empty, or malformed; the sync must make no destination changes based on that run. Empty feeds are a no-op and MUST NOT delete any events.
+- A schedule edit rotates source UIDs; matching unchanged events by normalized event fields avoids unnecessary recreation, while future managed entries absent from a valid non-empty feed are removed.
 - The destination calendar is unavailable or the authorized account loses edit permission; the run must report failure without claiming a successful sync.
 - Google authorization is revoked or requires user interaction again; the run must stop before changing events.
 - A previously sync-managed future event is manually edited or removed in Google; the next successful sync restores the Opsgenie version.
 - A shift has passed and disappears from a rolling source feed; its destination entry is retained as history.
-- Any upcoming source event is malformed, has no stable identity, or duplicates another event identity; the entire run must stop before making Google Calendar changes and report the feed issue.
+- Any upcoming source event is malformed, has no UID, or duplicates another UID in the same feed snapshot; the entire run must stop before making Google Calendar changes and report the feed issue.
 - A daily run is repeated with no source changes; it must not create duplicate events.
 
 ## Requirements *(mandatory)*
@@ -80,17 +81,17 @@ The user wants the sync to manage only the on-call entries it created and keep p
 - **FR-003**: The user MUST be able to authorize a Google account with edit access to the target calendar through an interactive setup step; routine scheduled runs MUST use the saved authorization without interactive sign-in.
 - **FR-004**: The sync MUST add missing upcoming source events and update matching sync-managed destination events when source details change.
 - **FR-005**: The sync MUST identify its own destination events so it can update or remove them while leaving all events it did not create unchanged.
-- **FR-006**: The sync MUST remove a future sync-managed destination event when that event has been removed from a successfully retrieved and completely parsed source feed.
+- **FR-006**: The sync MUST remove a future sync-managed destination event when it is absent from a successfully retrieved, completely parsed, non-empty source feed. The sync MUST only remove events carrying its private ownership marker.
 - **FR-007**: The sync MUST retain past sync-managed destination events as calendar history after they fall outside the source feed's current window.
 - **FR-008**: The sync MUST treat Opsgenie as authoritative; changes made manually to sync-managed destination events MUST be corrected on a later successful run. Changes to unrelated events MUST remain untouched.
-- **FR-009**: If the source feed cannot be retrieved, is empty, cannot be completely parsed, or contains an upcoming event with a missing or duplicate stable identity, the sync MUST make no destination changes based on that run and MUST report a failure.
+- **FR-009**: If the source feed cannot be retrieved, is empty, cannot be completely parsed, or contains an upcoming event with a missing or duplicate identity, the sync MUST make no destination changes based on that run and MUST report a failure.
 - **FR-010**: If Google authorization, target calendar access, or destination updates fail, the sync MUST report failure and MUST NOT report that run as successfully synchronized.
 - **FR-011**: Private source URLs, destination calendar identifiers, OAuth credentials, and tokens MUST be supplied outside tracked public files, excluded from logs, and omitted from sample configuration except as nonfunctional placeholders.
 - **FR-012**: The user MUST be able to determine from each run's output whether synchronization succeeded or failed and how many events were added, updated, or removed.
 
 ### Key Entities *(include if data involved)*
 
-- **Source shift**: An on-call event from the configured Opsgenie calendar feed, including its stable identity, timing, and available descriptive details.
+- **Source shift**: An on-call event from the configured Opsgenie calendar feed, including its snapshot UID, timing, and available descriptive details.
 - **Sync-managed event**: A Google Calendar event created by this sync and tracked so later runs can update or remove it safely.
 - **Sync run**: One scheduled or manual reconciliation attempt, with a success or failure result and counts of changes made.
 - **Private configuration and authorization**: The feed address, target calendar selection, and credentials needed to access the user's calendars; these are local deployment data, not public project content.
@@ -110,7 +111,7 @@ The user wants the sync to manage only the on-call entries it created and keep p
 ## Assumptions
 
 - The user operates one Opsgenie schedule feed and selects one existing family Google Calendar where their account has permission to make changes.
-- The source feed provides stable event identifiers and a complete view of the upcoming schedule it publishes. Planning must verify the feed's identity and rolling-window behavior before relying on absence to delete future events.
+- Each non-empty source snapshot contains unique event UIDs, though UIDs may rotate across schedule edits. The user accepts deletion of future sync-managed events absent from a valid non-empty feed; empty and invalid feeds cause no changes.
 - Past on-call events should remain in the shared calendar for history.
 - The sync is for the user's personal deployment; the public repository contains reusable code and placeholder configuration only.
 - The authorization may need to be repeated if revoked or invalidated; the scheduled job must make this condition visible.

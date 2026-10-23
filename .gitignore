@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
+.pytest_cache/
+coverage/
+htmlcov/
+
+# Local settings and credentials
+.env*
+config.toml
+oauth-client.json
+token.json
+*.token.json
+
+# Universal/editor
+.DS_Store
+Thumbs.db
+*.tmp
+*.swp
+.vscode/
+.idea/
