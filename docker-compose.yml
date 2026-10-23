@@ -1,0 +1,10 @@
+services:
+  sync:
+    build: .
+    environment:
+      ONCALL_SYNC_CONFIG_DIR: /run/oncall-config
+    volumes:
+      - ${ONCALL_SYNC_CONFIG_DIR:?Set ONCALL_SYNC_CONFIG_DIR to the private config directory}:/run/oncall-config:ro
+    read_only: true
+    tmpfs:
+      - /tmp

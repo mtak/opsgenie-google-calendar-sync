@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "oncall-calendar-sync"
+version = "0.1.0"
+description = "One-way Opsgenie iCalendar to Google Calendar sync"
+requires-python = ">=3.12"
+dependencies = [
+  "google-api-python-client>=2.150,<3",
+  "google-auth-oauthlib>=1.2,<2",
+  "icalendar>=6.1,<7",
+]
+
+[project.scripts]
+oncall-calendar-sync = "oncall_calendar_sync.cli:main"
+
+[project.optional-dependencies]
+dev = ["pytest>=8,<9"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra"

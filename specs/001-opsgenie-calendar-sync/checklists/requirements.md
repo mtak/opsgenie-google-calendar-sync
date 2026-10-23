@@ -31,5 +31,5 @@
 
 ## Notes
 
-- Quality review passed. The planning stage must verify Opsgenie's feed identity and rolling-window behavior before using feed absence to determine deletion.
+- Quality review passed. Sanitized feed observations are recorded in `research.md`; the user accepts deletion of absent future managed events from valid non-empty snapshots, with empty feeds remaining a no-op.
 - The constitution requires user approval of this specification before planning.
