@@ -141,6 +141,20 @@ The feed must be a non-empty iCalendar snapshot of uniquely identified, timed ev
 
 The sync requests Google Calendar's `calendar.events` scope. Keep the feed URL, calendar ID, OAuth client, and token out of tracked files, logs, and issue reports.
 
+## Container image (GHCR)
+
+On each push to `main`, GitHub Actions publishes the image as `ghcr.io/mtak/opsgenie-google-calendar-sync:<full-commit-sha>` and `ghcr.io/mtak/opsgenie-google-calendar-sync:latest`. Pull requests targeting `main` build the image for validation but do not publish it.
+
+The first published package is private by default. After the first successful main build, open the package from the repository owner's **Packages** page, select **Package settings**, and change its visibility to **Public**. This one-time setting allows anonymous pulls. If a package with this name already existed before this workflow, connect it to this repository and grant the repository's GitHub Actions workflow write access in the package settings before relying on `GITHUB_TOKEN` publication.
+
+For a source commit already published from `main`, pull the image for that commit’s full SHA:
+
+```bash
+docker pull "ghcr.io/mtak/opsgenie-google-calendar-sync:$(git rev-parse HEAD)"
+```
+
+When run from the published main revision, this command pulls that revision’s image. Use the selected full-SHA image reference deliberately for deployments. The mutable `latest` tag advances on successful pushes to `main` and is provided for convenience; deployments must not track it.
+
 ## Contributing
 
 This project uses GitHub Spec Kit for specification-driven development. The Opsgenie sync feature is documented in [`specs/001-opsgenie-calendar-sync/`](specs/001-opsgenie-calendar-sync/); its specification and plan describe the intended behavior and design.
