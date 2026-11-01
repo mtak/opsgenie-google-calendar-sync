@@ -1,4 +1,5 @@
 FROM python:3.12-slim
+LABEL org.opencontainers.image.source="https://github.com/mtak/opsgenie-google-calendar-sync"
 WORKDIR /app
 COPY pyproject.toml ./
 COPY src ./src
